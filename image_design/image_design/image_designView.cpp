@@ -23,12 +23,7 @@
 IMPLEMENT_DYNCREATE(CimagedesignView, CView)
 
 BEGIN_MESSAGE_MAP(CimagedesignView, CView)
-	// 标准打印命令
-	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CimagedesignView::OnFilePrintPreview)
-	ON_WM_CONTEXTMENU()
-	ON_WM_RBUTTONUP()
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // CimagedesignView 构造/析构
@@ -64,46 +59,6 @@ void CimagedesignView::OnDraw(CDC* /*pDC*/)
 }
 
 
-// CimagedesignView 打印
-
-
-void CimagedesignView::OnFilePrintPreview()
-{
-#ifndef SHARED_HANDLERS
-	AFXPrintPreview(this);
-#endif
-}
-
-BOOL CimagedesignView::OnPreparePrinting(CPrintInfo* pInfo)
-{
-	// 默认准备
-	return DoPreparePrinting(pInfo);
-}
-
-void CimagedesignView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
-{
-	// TODO: 添加额外的打印前进行的初始化过程
-}
-
-void CimagedesignView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
-{
-	// TODO: 添加打印后进行的清理过程
-}
-
-void CimagedesignView::OnRButtonUp(UINT /* nFlags */, CPoint point)
-{
-	ClientToScreen(&point);
-	OnContextMenu(this, point);
-}
-
-void CimagedesignView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
-{
-#ifndef SHARED_HANDLERS
-	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
-#endif
-}
-
-
 // CimagedesignView 诊断
 
 #ifdef _DEBUG
@@ -126,3 +81,17 @@ CimagedesignDoc* CimagedesignView::GetDocument() const // 非调试版本是内�
 
 
 // CimagedesignView 消息处理程序
+
+
+void CimagedesignView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	CString str;
+	//ZeroMemory(&str, sizeof(CString));
+	str.Format(_T("x=%d,y=%d"), point.x, point.y);
+
+	CDC* pDC = this->GetDC();
+	pDC->TextOut(point.x, point.y, str);
+	this->ReleaseDC(pDC);
+	CView::OnLButtonDown(nFlags, point);
+}

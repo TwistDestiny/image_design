@@ -19,13 +19,11 @@
 
 // CimagedesignApp
 
-BEGIN_MESSAGE_MAP(CimagedesignApp, CWinAppEx)
+BEGIN_MESSAGE_MAP(CimagedesignApp, CWinApp)
 	ON_COMMAND(ID_APP_ABOUT, &CimagedesignApp::OnAppAbout)
 	// 基于文件的标准文档命令
-	ON_COMMAND(ID_FILE_NEW, &CWinAppEx::OnFileNew)
-	ON_COMMAND(ID_FILE_OPEN, &CWinAppEx::OnFileOpen)
-	// 标准打印设置命令
-	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinAppEx::OnFilePrintSetup)
+	ON_COMMAND(ID_FILE_NEW, &CWinApp::OnFileNew)
+	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
 END_MESSAGE_MAP()
 
 
@@ -33,10 +31,7 @@ END_MESSAGE_MAP()
 
 CimagedesignApp::CimagedesignApp() noexcept
 {
-	m_bHiColorIcons = TRUE;
 
-
-	m_nAppLook = 0;
 	// 支持重新启动管理器
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_ALL_ASPECTS;
 #ifdef _MANAGED
@@ -63,27 +58,8 @@ CimagedesignApp theApp;
 
 BOOL CimagedesignApp::InitInstance()
 {
-	// 如果一个运行在 Windows XP 上的应用程序清单指定要
-	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
-	//则需要 InitCommonControlsEx()。  否则，将无法创建窗口。
-	INITCOMMONCONTROLSEX InitCtrls;
-	InitCtrls.dwSize = sizeof(InitCtrls);
-	// 将它设置为包括所有要在应用程序中使用的
-	// 公共控件类。
-	InitCtrls.dwICC = ICC_WIN95_CLASSES;
-	InitCommonControlsEx(&InitCtrls);
+	CWinApp::InitInstance();
 
-	CWinAppEx::InitInstance();
-
-
-	// 初始化 OLE 库
-	if (!AfxOleInit())
-	{
-		AfxMessageBox(IDP_OLE_INIT_FAILED);
-		return FALSE;
-	}
-
-	AfxEnableControlContainer();
 
 	EnableTaskbarInteraction(FALSE);
 
@@ -100,16 +76,6 @@ BOOL CimagedesignApp::InitInstance()
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 	LoadStdProfileSettings(4);  // 加载标准 INI 文件选项(包括 MRU)
 
-
-	InitContextMenuManager();
-
-	InitKeyboardManager();
-
-	InitTooltipManager();
-	CMFCToolTipInfo ttParams;
-	ttParams.m_bVislManagerTheme = TRUE;
-	theApp.GetTooltipManager()->SetTooltipParams(AFX_TOOLTIP_TYPE_ALL,
-		RUNTIME_CLASS(CMFCToolTipCtrl), &ttParams);
 
 	// 注册应用程序的文档模板。  文档模板
 	// 将用作文档、框架窗口和视图之间的连接
@@ -139,14 +105,6 @@ BOOL CimagedesignApp::InitInstance()
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
 	return TRUE;
-}
-
-int CimagedesignApp::ExitInstance()
-{
-	//TODO: 处理可能已添加的附加资源
-	AfxOleTerm(FALSE);
-
-	return CWinAppEx::ExitInstance();
 }
 
 // CimagedesignApp 消息处理程序
@@ -189,28 +147,6 @@ void CimagedesignApp::OnAppAbout()
 {
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
-}
-
-// CimagedesignApp 自定义加载/保存方法
-
-void CimagedesignApp::PreLoadState()
-{
-	BOOL bNameValid;
-	CString strName;
-	bNameValid = strName.LoadString(IDS_EDIT_MENU);
-	ASSERT(bNameValid);
-	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT);
-	bNameValid = strName.LoadString(IDS_EXPLORER);
-	ASSERT(bNameValid);
-	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EXPLORER);
-}
-
-void CimagedesignApp::LoadCustomState()
-{
-}
-
-void CimagedesignApp::SaveCustomState()
-{
 }
 
 // CimagedesignApp 消息处理程序

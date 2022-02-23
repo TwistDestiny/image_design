@@ -14,7 +14,7 @@
 // 有关此类的实现，请参阅 image_design.cpp
 //
 
-class CimagedesignApp : public CWinAppEx
+class CimagedesignApp : public CWinApp
 {
 public:
 	CimagedesignApp() noexcept;
@@ -23,16 +23,8 @@ public:
 // 重写
 public:
 	virtual BOOL InitInstance();
-	virtual int ExitInstance();
 
 // 实现
-	UINT  m_nAppLook;
-	BOOL  m_bHiColorIcons;
-
-	virtual void PreLoadState();
-	virtual void LoadCustomState();
-	virtual void SaveCustomState();
-
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
 };
