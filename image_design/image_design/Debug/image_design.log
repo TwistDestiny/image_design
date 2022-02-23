@@ -1,2 +1,8 @@
-﻿  image_designView.cpp
+﻿  image_design.cpp
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\resource.h(9,1): warning C4005: “IDCANCEL”: 宏重定义
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winuser.h(11118): message : 参见“IDCANCEL”的前一个定义
+  image_designView.cpp
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\resource.h(9,1): warning C4005: “IDCANCEL”: 宏重定义
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winuser.h(11118): message : 参见“IDCANCEL”的前一个定义
+  正在生成代码...
   image_design.vcxproj -> D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\Debug\image_design.exe

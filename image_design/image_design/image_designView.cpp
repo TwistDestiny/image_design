@@ -4,6 +4,7 @@
 
 #include "pch.h"
 #include "framework.h"
+#include "Cpoint_data.h"
 // SHARED_HANDLERS 可以在实现预览、缩略图和搜索筛选器句柄的
 // ATL 项目中进行定义，并允许与该项目共享文档代码。
 #ifndef SHARED_HANDLERS
@@ -12,7 +13,7 @@
 
 #include "image_designDoc.h"
 #include "image_designView.h"
-
+#include "Cpoint_data.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -24,6 +25,8 @@ IMPLEMENT_DYNCREATE(CimagedesignView, CView)
 
 BEGIN_MESSAGE_MAP(CimagedesignView, CView)
 	ON_WM_LBUTTONDOWN()
+	ON_COMMAND(ID_SHOW, &CimagedesignView::OnShow)
+	ON_COMMAND(ID_32775, &CimagedesignView::OnClick)
 END_MESSAGE_MAP()
 
 // CimagedesignView 构造/析构
@@ -94,4 +97,21 @@ void CimagedesignView::OnLButtonDown(UINT nFlags, CPoint point)
 	pDC->TextOut(point.x, point.y, str);
 	this->ReleaseDC(pDC);
 	CView::OnLButtonDown(nFlags, point);
+}
+
+
+void CimagedesignView::OnShow()
+{
+	// TODO: 在此添加命令处理程序代码
+	//MessageBox(_T("消息框"), NULL, MB_OK);
+}
+
+
+void CimagedesignView::OnClick()
+{
+	//MessageBox(_T("消息框"), NULL, MB_OK);
+	// TODO: 在此添加命令处理程序代码
+	Cpoint_data* mydlg = new Cpoint_data;
+	mydlg->Create(IDD_DIALOG1, this);
+	mydlg->ShowWindow(SW_SHOW);
 }

@@ -17,7 +17,7 @@ public:
 
 // 操作
 public:
-
+	//Cpoint_data* Cptdata;
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
@@ -39,6 +39,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnShow();
+	afx_msg void OnClick();
 };
 
 #ifndef _DEBUG  // image_designView.cpp 中的调试版本
