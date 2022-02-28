@@ -17,7 +17,8 @@ public:
 
 // 操作
 public:
-	//Cpoint_data* Cptdata;
+	CDialogEx* Cptdata = NULL;
+	CPoint last_p;
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图

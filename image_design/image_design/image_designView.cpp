@@ -8,12 +8,13 @@
 // SHARED_HANDLERS 可以在实现预览、缩略图和搜索筛选器句柄的
 // ATL 项目中进行定义，并允许与该项目共享文档代码。
 #ifndef SHARED_HANDLERS
+#include "Cpoint_data.h"
 #include "image_design.h"
 #endif
 
 #include "image_designDoc.h"
 #include "image_designView.h"
-#include "Cpoint_data.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -34,11 +35,15 @@ END_MESSAGE_MAP()
 CimagedesignView::CimagedesignView() noexcept
 {
 	// TODO: 在此处添加构造代码
+	last_p.x = -1;
+	last_p.y = -1;
 
 }
 
 CimagedesignView::~CimagedesignView()
 {
+	if (this->Cptdata != NULL)
+		delete this->Cptdata;
 }
 
 BOOL CimagedesignView::PreCreateWindow(CREATESTRUCT& cs)
@@ -94,9 +99,29 @@ void CimagedesignView::OnLButtonDown(UINT nFlags, CPoint point)
 	str.Format(_T("x=%d,y=%d"), point.x, point.y);
 
 	CDC* pDC = this->GetDC();
+	
 	pDC->TextOut(point.x, point.y, str);
+
+	if (last_p.x > 0 && last_p.y > 0) {
+		HDC hdc;
+		hdc = ::GetDC(m_hWnd);
+		MoveToEx(hdc, last_p.x, last_p.y, NULL);
+		LineTo(hdc, point.x, point.y);
+		::ReleaseDC(m_hWnd, hdc);
+	}
 	this->ReleaseDC(pDC);
+	last_p = point;
 	CView::OnLButtonDown(nFlags, point);
+	if (this->Cptdata != NULL) {
+		Cpoint_data* ptr = (Cpoint_data*)this->Cptdata;
+		ptr->position_X = point.x;
+		ptr->position_Y = point.y;
+		ptr->set_edit();
+	}
+
+
+
+	
 }
 
 
@@ -111,7 +136,12 @@ void CimagedesignView::OnClick()
 {
 	//MessageBox(_T("消息框"), NULL, MB_OK);
 	// TODO: 在此添加命令处理程序代码
-	Cpoint_data* mydlg = new Cpoint_data;
-	mydlg->Create(IDD_DIALOG1, this);
-	mydlg->ShowWindow(SW_SHOW);
+	if (Cptdata == NULL) {
+		Cptdata = new Cpoint_data;
+		Cptdata->Create(IDD_DIALOG1, this);
+	}
+
+	 Cptdata->ShowWindow(SW_SHOW);
+
+
 }
