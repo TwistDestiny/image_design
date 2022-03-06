@@ -42,6 +42,7 @@ void Cpoint_data::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(Cpoint_data, CDialogEx)
 	ON_BN_CLICKED(IDOK, &Cpoint_data::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_BUTTON1, &Cpoint_data::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -75,4 +76,11 @@ void Cpoint_data::OnBnClickedOk()
 	this->ReleaseDC(pDC);
 	//CDialogEx::OnOK();
 	
+}
+
+
+void Cpoint_data::OnBnClickedButton1()
+{
+	MessageBox(_T("ddd"), NULL, MB_OK);
+	// TODO: 在此添加控件通知处理程序代码
 }

@@ -14,11 +14,14 @@ protected: // 仅从序列化创建
 // 特性
 public:
 	CimagedesignDoc* GetDocument() const;
-
+	
+	
+ 
 // 操作
 public:
 	CDialogEx* Cptdata = NULL;
 	CPoint last_p;
+	vector<CPoint> clpoint;
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图

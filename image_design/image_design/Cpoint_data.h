@@ -26,4 +26,5 @@ public:
 	int position_X;
 	int position_Y;
 	CEdit pos_y;
+	afx_msg void OnBnClickedButton1();
 };
