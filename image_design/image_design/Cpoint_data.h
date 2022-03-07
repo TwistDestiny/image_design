@@ -24,7 +24,9 @@ public:
 	afx_msg void OnBnClickedOk();
 	CEdit pos_x;
 	int position_X;
+	bool is_closed = false;
 	int position_Y;
 	CEdit pos_y;
+	CArray<CPoint>* cli_ptr;
 	afx_msg void OnBnClickedButton1();
 };

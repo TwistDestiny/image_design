@@ -6,13 +6,14 @@
 #include "Cpoint_data.h"
 #include "afxdialogex.h"
 
-
+extern bool is_fill;
 // Cpoint_data 对话框
 
 IMPLEMENT_DYNAMIC(Cpoint_data, CDialogEx)
 
 Cpoint_data::Cpoint_data(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_DIALOG1, pParent)
+
 {
 
 }
@@ -70,17 +71,24 @@ void Cpoint_data::OnBnClickedOk()
 
 	if (x <= 0 || y <= 0 || x >= wndRect2.Width() || y >= wndRect2.Height()) {
 		MessageBox(str3, NULL, MB_OK);
+		return;
 	}
-	CDC* pDC = GetParent()->GetDC();
-	pDC->TextOut(this->position_X, this->position_Y, str2);
-	this->ReleaseDC(pDC);
-	//CDialogEx::OnOK();
-	
+	if (!is_closed) {
+		CPoint tmp;
+		tmp.x = x;
+		tmp.y = y;
+		cli_ptr->Add(tmp);
+		GetParent()->Invalidate();
+	}
 }
 
 
 void Cpoint_data::OnBnClickedButton1()
 {
-	MessageBox(_T("ddd"), NULL, MB_OK);
+	if (is_fill)
+		return;
+	if(cli_ptr->GetSize()>=3 )
+		is_closed = !is_closed;
+	GetParent()->Invalidate();
 	// TODO: 在此添加控件通知处理程序代码
 }

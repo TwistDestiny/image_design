@@ -4,7 +4,7 @@
 
 #pragma once
 
-
+class Cpoint_data;
 class CimagedesignView : public CView
 {
 protected: // 仅从序列化创建
@@ -19,9 +19,11 @@ public:
  
 // 操作
 public:
-	CDialogEx* Cptdata = NULL;
+	Cpoint_data* Cptdata = NULL;
 	CPoint last_p;
-	vector<CPoint> clpoint;
+	CArray<CPoint> cli_pt;
+	bool fillFlag = false;
+	bool is_closed = false;
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
@@ -45,6 +47,8 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnShow();
 	afx_msg void OnClick();
+	afx_msg void OnFill();
+	void fillPolygon(CDC* pDC);
 };
 
 #ifndef _DEBUG  // image_designView.cpp 中的调试版本
