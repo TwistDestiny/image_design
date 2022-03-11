@@ -5,6 +5,7 @@
 #pragma once
 
 class Cpoint_data;
+enum pen_state { d_none = 0,d_point, d_line, d_rect, d_cut };
 class CimagedesignView : public CView
 {
 protected: // 仅从序列化创建
@@ -21,9 +22,10 @@ public:
 public:
 	Cpoint_data* Cptdata = NULL;
 	CPoint last_p;
-	CArray<CPoint> cli_pt;
+	CArray<CPoint> cli_pt,rect_pt;
 	bool fillFlag = false;
 	bool is_closed = false;
+	pen_state pen_view = d_point;
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
@@ -49,6 +51,14 @@ public:
 	afx_msg void OnClick();
 	afx_msg void OnFill();
 	void fillPolygon(CDC* pDC);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnDrawPoint();
+	afx_msg void OnDrawLine();
+	afx_msg void OnPolyClose();
+	afx_msg void OnDrawRect();
+	afx_msg void OnPolyCut();
+	afx_msg void OnClearImg();
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };
 
 #ifndef _DEBUG  // image_designView.cpp 中的调试版本

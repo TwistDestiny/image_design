@@ -7,6 +7,7 @@
 #include "afxdialogex.h"
 
 extern bool is_fill;
+extern CPoint last_point,er_point;
 // Cpoint_data 对话框
 
 IMPLEMENT_DYNAMIC(Cpoint_data, CDialogEx)
@@ -78,6 +79,8 @@ void Cpoint_data::OnBnClickedOk()
 		tmp.x = x;
 		tmp.y = y;
 		cli_ptr->Add(tmp);
+		last_point = tmp;
+		er_point = tmp;
 		GetParent()->Invalidate();
 	}
 }
@@ -85,10 +88,10 @@ void Cpoint_data::OnBnClickedOk()
 
 void Cpoint_data::OnBnClickedButton1()
 {
-	if (is_fill)
-		return;
-	if(cli_ptr->GetSize()>=3 )
-		is_closed = !is_closed;
-	GetParent()->Invalidate();
+	//if (is_fill)
+	//	return;
+	//if(cli_ptr->GetSize()>=3 )
+	//	is_closed = !is_closed;
+	//GetParent()->Invalidate();
 	// TODO: 在此添加控件通知处理程序代码
 }
