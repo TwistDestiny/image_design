@@ -300,21 +300,16 @@ void CimagedesignView::OnDrawRect()
 	pen_view = d_rect;
 	rect_count = 0;
 	rect_pt.RemoveAll();
-	CPoint p1(xmin, ymin), p2(xmax, ymax);
-	CRect p(p1,p2);
-	InvalidateRect(p);
+	Invalidate();
 }
 
 
-void CimagedesignView::OnPolyCut()
-{
-	// TODO: 在此添加命令处理程序代码
 
-}
 
 void CimagedesignView::OnClearImg()
 {
 	cli_pt.RemoveAll();
+	rect_pt.RemoveAll();
 	is_fill = false;
 	fillFlag = false;
 	is_closed = false;
@@ -323,6 +318,185 @@ void CimagedesignView::OnClearImg()
 	// TODO: 在此添加命令处理程序代码
 }
 
+void CimagedesignView::OnPolyCut()
+{
+	if (rect_pt.GetSize() >= 2&&is_closed&&!is_fill) {
+		CArray<CPoint> line_up, line_down, line_left, line_right;
+		if (rect_pt.GetAt(0).x < rect_pt.GetAt(1).x) {
+			line_left.Add(rect_pt.GetAt(0));
+			line_left.Add(CPoint(rect_pt.GetAt(0).x, rect_pt.GetAt(1).y));
+			line_right.Add(CPoint(rect_pt.GetAt(1).x, rect_pt.GetAt(0).y));
+			line_right.Add(rect_pt.GetAt(1));
+			
+		}
+		else {
+			line_right.Add(rect_pt.GetAt(0));
+			line_right.Add(CPoint(rect_pt.GetAt(0).x, rect_pt.GetAt(1).y));
+			line_left.Add(CPoint(rect_pt.GetAt(1).x, rect_pt.GetAt(0).y));
+			line_left.Add(rect_pt.GetAt(1));
+		}
+		if (rect_pt.GetAt(0).y < rect_pt.GetAt(1).y) {
+			line_up.Add(rect_pt.GetAt(0));
+			line_up.Add(CPoint(rect_pt.GetAt(1).x, rect_pt.GetAt(0).y));
+			line_down.Add(CPoint(rect_pt.GetAt(0).x, rect_pt.GetAt(1).y));
+			line_down.Add(rect_pt.GetAt(1));
+		}
+		else {
+			line_down.Add(rect_pt.GetAt(0));
+			line_down.Add(CPoint(rect_pt.GetAt(1).x, rect_pt.GetAt(0).y));
+			line_up.Add(CPoint(rect_pt.GetAt(0).x, rect_pt.GetAt(1).y));
+			line_up.Add(rect_pt.GetAt(1));
+		}
+		//------------------right-----------------------------------------//
+	
+		CPoint tmp = cli_pt.GetAt(0);
+		cli_pt.Add(tmp);
+		for (int j = 0; j < cli_pt.GetSize() - 1; j++) {
+			CPoint p1 = cli_pt.GetAt(j);
+			CPoint p2 = cli_pt.GetAt(j + 1),p3;
+			double k = ((double)(p2.y - p1.y)) / (p2.x - p1.x);
+			if (p1.x > line_right.GetAt(0).x) {
+				if (p2.x <= line_right.GetAt(0).x) {
+					p3.x = line_right.GetAt(0).x;
+					p3.y = (int)(k * (p3.x - p1.x)) + p1.y;
+					cut_pt.Add(p3);
+				}
+				else{
+					p3.x = line_right.GetAt(0).x;
+					p3.y = p1.y;
+					cut_pt.Add(p3);
+				}
+			}
+			else {
+				cut_pt.Add(p1);
+				if (p2.x > line_right.GetAt(0).x) {
+					p3.x = line_right.GetAt(0).x;
+					p3.y = (int)(k * (p3.x - p1.x)) + p1.y;
+					cut_pt.Add(p3);
+				}
+			
+			}
+		}
+		cli_pt.RemoveAll();
+		cli_pt.Copy(cut_pt);
+		cut_pt.RemoveAll();
+		//------------------right----------------------//
+		//------------------left----------------------//
+		tmp = cli_pt.GetAt(0);
+		cli_pt.Add(tmp);
+		for (int j = 0; j < cli_pt.GetSize() - 1; j++) {
+			CPoint p1 = cli_pt.GetAt(j);
+			CPoint p2 = cli_pt.GetAt(j + 1), p3;
+			double k = ((double)(p2.y - p1.y)) / (p2.x - p1.x);
+			if (p1.x < line_left.GetAt(0).x) {
+				if (p2.x >= line_left.GetAt(0).x) {
+					p3.x = line_left.GetAt(0).x;
+					p3.y = (int)(k * (p3.x - p1.x)) + p1.y;
+					cut_pt.Add(p3);
+				}
+				else {
+					p3.x = line_left.GetAt(0).x;
+					p3.y = p1.y;
+					cut_pt.Add(p3);
+				}
+			}
+			else {
+				cut_pt.Add(p1);
+				if (p2.x < line_left.GetAt(0).x) {
+					p3.x = line_left.GetAt(0).x;
+					p3.y = (int)(k * (p3.x - p1.x)) + p1.y;
+					cut_pt.Add(p3);
+				}
+
+			}
+		}
+		cli_pt.RemoveAll();
+		cli_pt.Copy(cut_pt);
+		cut_pt.RemoveAll();
+		//------------------left----------------------//
+		//------------------up----------------------//
+		tmp = cli_pt.GetAt(0);
+		cli_pt.Add(tmp);
+		for (int j = 0; j < cli_pt.GetSize() - 1; j++) {
+			CPoint p1 = cli_pt.GetAt(j);
+			CPoint p2 = cli_pt.GetAt(j + 1), p3;
+			double t = ((double)(p2.x - p1.x)) / (p2.y - p1.y);
+			if (p1.y < line_up.GetAt(0).y) {
+				if (p2.y >= line_up.GetAt(0).y) {
+					p3.y = line_up.GetAt(0).y;
+					p3.x = (int)(t * (p3.y - p1.y)) + p1.x;
+					cut_pt.Add(p3);
+				}
+				else {
+					p3.y = line_up.GetAt(0).y;
+					p3.x = p1.x;
+					cut_pt.Add(p3);
+				}
+			}
+			else {
+				cut_pt.Add(p1);
+				if (p2.y < line_up.GetAt(0).y) {
+					p3.y = line_up.GetAt(0).y;
+					p3.x = (int)(t * (p3.y - p1.y)) + p1.x;
+					cut_pt.Add(p3);
+				}
+
+			}
+		}
+		cli_pt.RemoveAll();
+		cli_pt.Copy(cut_pt);
+		cut_pt.RemoveAll();
+		//------------------up----------------------//
+		//------------------down----------------------//
+		tmp = cli_pt.GetAt(0);
+		cli_pt.Add(tmp);
+		for (int j = 0; j < cli_pt.GetSize() - 1; j++) {
+			CPoint p1 = cli_pt.GetAt(j);
+			CPoint p2 = cli_pt.GetAt(j + 1), p3;
+			double t = ((double)(p2.x - p1.x)) / (p2.y - p1.y);
+			if (p1.y > line_down.GetAt(0).y) {
+				if (p2.y <= line_down.GetAt(0).y) {
+					p3.y = line_down.GetAt(0).y;
+					p3.x = (int)(t * (p3.y - p1.y)) + p1.x;
+					cut_pt.Add(p3);
+				}
+				else {
+					p3.y = line_down.GetAt(0).y;
+					p3.x = p1.x;
+					cut_pt.Add(p3);
+				}
+			}
+			else {
+				cut_pt.Add(p1);
+				if (p2.y > line_down.GetAt(0).y) {
+					p3.y = line_down.GetAt(0).y;
+					p3.x = (int)(t * (p3.y - p1.y)) + p1.x;
+					cut_pt.Add(p3);
+				}
+
+			}
+		}
+		cli_pt.RemoveAll();
+		cli_pt.Copy(cut_pt);
+		cut_pt.RemoveAll();
+		//------------------down----------------------//
+		
+
+
+	}
+
+	
+
+
+
+
+
+
+
+	
+	Invalidate();
+
+}
 
 void CimagedesignView::fillPolygon(CDC* pDC) {
 	int ymin, ymax;
@@ -376,6 +550,20 @@ void CimagedesignView::fillPolygon(CDC* pDC) {
 	}
 	this->cli_pt.RemoveAt(cli_pt.GetSize() - 1);
 }
+
+//void CetRectLineX(CPoint p1, CPoint p2, CPoint t1, CPoint t2,int flag) {
+//	if (flag == 0) { //upline
+//		if (t1.y > p1.y && t2.y > p1.y)
+//			;
+//		else if (t1.y > p1.y&& t2.y < p1.y) {
+//			int mx = GetInterPointX(p1.y, t1.x, t1.y, t2.x, t2.y);
+//			if(mx>= min(p1.x,p2.x)&& mx <= max(p1.x, p2.x))
+//		}
+//	}
+//	
+//
+//
+//}
 
 int GetInterPointX(int yx, int x0, int y0, int x1, int y1)
 {

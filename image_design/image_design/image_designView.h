@@ -22,7 +22,7 @@ public:
 public:
 	Cpoint_data* Cptdata = NULL;
 	CPoint last_p;
-	CArray<CPoint> cli_pt,rect_pt;
+	CArray<CPoint> cli_pt,rect_pt,cut_pt;
 	bool fillFlag = false;
 	bool is_closed = false;
 	pen_state pen_view = d_point;
