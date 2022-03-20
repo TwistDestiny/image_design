@@ -10,6 +10,7 @@
 #ifndef SHARED_HANDLERS
 #include "Cpoint_data.h"
 #include "image_design.h"
+#include"CRotateDlg.h"
 #endif
 
 #include "image_designDoc.h"
@@ -37,10 +38,15 @@ BEGIN_MESSAGE_MAP(CimagedesignView, CView)
 	ON_COMMAND(ID_32782, &CimagedesignView::OnPolyCut)
 	ON_COMMAND(ID_32783, &CimagedesignView::OnClearImg)
 	ON_WM_ERASEBKGND()
+	ON_WM_RBUTTONDOWN()
+	ON_COMMAND(ID_32784, &CimagedesignView::OnDrag)
+	ON_COMMAND(ID_32785, &CimagedesignView::OnExpand)
+	ON_COMMAND(ID_32786, &CimagedesignView::OnRotate)
+	ON_COMMAND(ID_32787, &CimagedesignView::OnSymmetry)
 END_MESSAGE_MAP()
 bool is_fill = false;
 CPoint last_point,er_point;
-int rect_count = 0,xmin=0,xmax=50000,ymin=0,ymax=50000;
+int rect_count = 0,xmin=0,xmax=50000,ymin=0,ymax=50000, drag_count = 0, symmetry_count = 0;
 // CimagedesignView 构造/析构
 void InsertPoint_x(CArray<int, int>& m_x_Array, int m_x);
 int GetInterPointX(int yx, int x0, int y0, int x1, int y1);
@@ -58,6 +64,8 @@ CimagedesignView::~CimagedesignView()
 {
 	if (this->Cptdata != NULL)
 		delete this->Cptdata;
+	if (this->Crotate != NULL)
+		delete this->Crotate;
 }
 
 BOOL CimagedesignView::PreCreateWindow(CREATESTRUCT& cs)
@@ -76,9 +84,10 @@ void CimagedesignView::OnDraw(CDC* pDC)
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
+
 	CDC h_dc;
 	CDC *n_dc=&h_dc;
-	
+
 	CBitmap m_bitmap;
 	h_dc.CreateCompatibleDC(pDC);
 	CRect wndRect2;
@@ -88,6 +97,7 @@ void CimagedesignView::OnDraw(CDC* pDC)
 	h_dc.FillSolidRect(0, 0, wndRect2.Width(), wndRect2.Height(), RGB(255, 255, 255));
 
 	CPoint point;
+	
 	for (int i = 0; i < cli_pt.GetSize(); i++) {
 		point = cli_pt.GetAt(i);
 		CString str;
@@ -115,12 +125,15 @@ void CimagedesignView::OnDraw(CDC* pDC)
 	}
 	if(fillFlag)
 		fillPolygon(n_dc);
-	if (rect_count == 2) {
+	if (rect_count == 2&&pen_view == d_rect) {
 
 		n_dc->SelectObject(GetStockObject(NULL_BRUSH));
 		n_dc->Rectangle(CRect(rect_pt.GetAt(0), rect_pt.GetAt(1)));
 	}
-	pDC->BitBlt(xmin, ymin, xmax-xmin, ymax-ymin, n_dc, 0, 0, SRCCOPY);
+	if (pen_view == d_symmetry && symmetry_count == 2) {
+		DDA_Line(n_dc, symmetry_pt.GetAt(0), symmetry_pt.GetAt(1), RGB(0, 0, 0));
+	}
+	pDC->BitBlt(0, 0, wndRect2.Width(), wndRect2.Height(), n_dc, 0, 0, SRCCOPY);
 
 	m_bitmap.DeleteObject();		//删除位图对象
 	h_dc.DeleteDC();
@@ -161,14 +174,43 @@ void CimagedesignView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	if (pen_view == d_rect) {
-		Insize(point);
-		rect_count++;
-		rect_pt.Add(point);
+		if (rect_count < 2) {
+			Insize(point);
+			rect_count++;
+			rect_pt.Add(point);
+		}
 		if (rect_count == 2) {
-			pen_view = d_none;
 			Invalidate();
 		}
 		return;
+	}
+	if (pen_view == d_drag) {
+		drag_count++;
+		drag_pt.Add(point);
+		if (drag_count == 2) {
+			int dx = drag_pt.GetAt(1).x - drag_pt.GetAt(0).x, dy = drag_pt.GetAt(1).y - drag_pt.GetAt(0).y;
+			CPoint temp;
+			for (int t = 0; t < cli_pt.GetSize(); t++) {
+				temp = cli_pt.GetAt(t);
+				temp.x += dx;
+				temp.y += dy;
+				cli_pt.SetAt(t, temp);
+				
+			}
+			drag_count = 0;
+			drag_pt.RemoveAll();
+			Invalidate();
+		}
+	}
+	if (pen_view == d_symmetry) {
+		if (symmetry_count < 2) {
+			symmetry_count++;
+			symmetry_pt.Add(point);
+			Invalidate();
+		}
+	}
+	if (pen_view == d_rotate) {
+		Crotate->set_edit(point);
 	}
 	if (is_closed) {
 		return;
@@ -229,26 +271,33 @@ void CimagedesignView::OnFill()
 //扫描转换
 	//得到最小和最大扫描线
 
-
-
+bool flag = false;
 void CimagedesignView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	//if (last_point.x > 0 && !is_closed && !is_fill && point.x > 0 && point.y > 0) {
-	//	CPoint tmp = point;
-	//	if (point.x < 5 || point.y < 5)
-	//		tmp = last_point;
-	//	CDC* pDC = GetDC();
-	//	//获得图形显示设备指针
-	//	pDC->SetROP2(R2_NOT);
-	//	DDA_Line(pDC, last_point, er_point, RGB(0, 255, 0));  //绘制上次的图形，进行擦除
-	//	DDA_Line(pDC, last_point, tmp, RGB(0, 255, 0));   //绘制新位置的图形
-	//	er_point = tmp;
+	
+	if (last_point.x > 0 && !is_closed && !is_fill && point.x > 0 && point.y > 0&&pen_view == d_line) {
+		CPoint tmp = point;
+		if (point.x < 5 || point.y < 5)
+			tmp = last_point;
+		CDC* pDC = GetDC();
+		//获得图形显示设备指针
+		pDC->SetROP2(R2_NOT);
+		DDA_Line(pDC, last_point, er_point, RGB(0, 255, 0));  //绘制上次的图形，进行擦除
+		DDA_Line(pDC, last_point, tmp, RGB(0, 255, 0));   //绘制新位置的图形
+		flag = true;
+		er_point = tmp;
+		ReleaseDC(pDC);
+	}
+	//else if (flag) {
+	//	CDC* pDC1 = GetDC();
+	//	pDC1->SetROP2(R2_NOT);
+	//	DDA_Line(pDC1, last_point, er_point, RGB(0, 255, 0));  //绘制上次的图形，进行擦除
+	//	ReleaseDC(pDC1);
+	//	flag = false;
 	//}
-	
-		
-	
+
 	CView::OnMouseMove(nFlags, point);
 }
 
@@ -308,8 +357,14 @@ void CimagedesignView::OnDrawRect()
 
 void CimagedesignView::OnClearImg()
 {
-	cli_pt.RemoveAll();
-	rect_pt.RemoveAll();
+	if(cli_pt.GetSize()>0)
+		cli_pt.RemoveAll();
+	if (rect_pt.GetSize() > 0)
+		rect_pt.RemoveAll();
+	if (!drag_pt.IsEmpty())
+		drag_pt.RemoveAll();
+	if (!symmetry_pt.IsEmpty())
+		symmetry_pt.RemoveAll();
 	is_fill = false;
 	fillFlag = false;
 	is_closed = false;
@@ -320,7 +375,7 @@ void CimagedesignView::OnClearImg()
 
 void CimagedesignView::OnPolyCut()
 {
-	if (rect_pt.GetSize() >= 2&&is_closed&&!is_fill) {
+	if (rect_pt.GetSize() >= 2&&is_closed) {
 		CArray<CPoint> line_up, line_down, line_left, line_right;
 		if (rect_pt.GetAt(0).x < rect_pt.GetAt(1).x) {
 			line_left.Add(rect_pt.GetAt(0));
@@ -361,11 +416,11 @@ void CimagedesignView::OnPolyCut()
 					p3.y = (int)(k * (p3.x - p1.x)) + p1.y;
 					cut_pt.Add(p3);
 				}
-				else{
-					p3.x = line_right.GetAt(0).x;
-					p3.y = p1.y;
-					cut_pt.Add(p3);
-				}
+				//else{
+				//	p3.x = line_right.GetAt(0).x;
+				//	p3.y = p1.y;
+				//	cut_pt.Add(p3);
+				//}
 			}
 			else {
 				cut_pt.Add(p1);
@@ -394,11 +449,11 @@ void CimagedesignView::OnPolyCut()
 					p3.y = (int)(k * (p3.x - p1.x)) + p1.y;
 					cut_pt.Add(p3);
 				}
-				else {
+	/*			else {
 					p3.x = line_left.GetAt(0).x;
 					p3.y = p1.y;
 					cut_pt.Add(p3);
-				}
+				}*/
 			}
 			else {
 				cut_pt.Add(p1);
@@ -427,11 +482,11 @@ void CimagedesignView::OnPolyCut()
 					p3.x = (int)(t * (p3.y - p1.y)) + p1.x;
 					cut_pt.Add(p3);
 				}
-				else {
-					p3.y = line_up.GetAt(0).y;
-					p3.x = p1.x;
-					cut_pt.Add(p3);
-				}
+				//else {
+				//	p3.y = line_up.GetAt(0).y;
+				//	p3.x = p1.x;
+				//	cut_pt.Add(p3);
+				//}
 			}
 			else {
 				cut_pt.Add(p1);
@@ -460,11 +515,11 @@ void CimagedesignView::OnPolyCut()
 					p3.x = (int)(t * (p3.y - p1.y)) + p1.x;
 					cut_pt.Add(p3);
 				}
-				else {
+			/*	else {
 					p3.y = line_down.GetAt(0).y;
 					p3.x = p1.x;
 					cut_pt.Add(p3);
-				}
+				}*/
 			}
 			else {
 				cut_pt.Add(p1);
@@ -480,20 +535,8 @@ void CimagedesignView::OnPolyCut()
 		cli_pt.Copy(cut_pt);
 		cut_pt.RemoveAll();
 		//------------------down----------------------//
-		
-
-
 	}
 
-	
-
-
-
-
-
-
-
-	
 	Invalidate();
 
 }
@@ -670,6 +713,13 @@ void DDA_Line(CDC*& pDC, CPoint& startPoint, CPoint& endPoint, COLORREF crColor)
 			}
 		}
 	}
+	else if (startPoint.y == endPoint.y) {
+		int min = min(startPoint.x, endPoint.x), max = max(startPoint.x, endPoint.x);
+		for (int i = min; i<= max; i++)
+		{
+			pDC->SetPixel(i, startPoint.y, crColor);
+		}
+	}
 }
 
 void Insize(CPoint p) {
@@ -684,4 +734,88 @@ BOOL CimagedesignView::OnEraseBkgnd(CDC* pDC)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 
 	return true;
+}
+
+
+void CimagedesignView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	if (pen_view == d_line)
+		OnPolyClose();
+	else if (is_closed && rect_count == 2&&pen_view == d_rect)
+		OnPolyCut();
+	else if (is_closed && symmetry_count == 2) {
+		int x1 = symmetry_pt.GetAt(0).x, y1 = symmetry_pt.GetAt(0).y, x2 = symmetry_pt.GetAt(1).x, y2 = symmetry_pt.GetAt(1).y;
+		CPoint temp;
+		if (x1 == x2) {
+			for (int z = 0; z < cli_pt.GetSize(); z++) {
+				temp = cli_pt.GetAt(z);
+				temp.x = 2 * x1 - temp.x;
+				cli_pt.SetAt(z, temp);
+			}
+		}
+		else {
+			int A = y1 - y2, B = x2 - x1, C = (x1 - x2) * y1 - (y1 - y2) * x1;
+			float M = A * A + B * B;
+			for (int z = 0; z < cli_pt.GetSize(); z++) {
+				temp = cli_pt.GetAt(z);
+				int ja = temp.x, jb = temp.y;
+				temp.x = -1 * (2 * A * B * jb + (A * A - B * B) * ja + 2 * A * C) / M;
+				temp.y = -1 * (2 * A * B * ja + (-A * A + B * B) * jb + 2 * B * C) / M;
+				cli_pt.SetAt(z, temp);
+			}
+		}
+		Invalidate();
+	}
+	CView::OnRButtonDown(nFlags, point);
+}
+
+
+void CimagedesignView::OnDrag()
+{
+	drag_count = 0;
+	if (!drag_pt.IsEmpty())
+		drag_pt.RemoveAll();
+	if (is_closed) {
+		pen_view = d_drag;
+	}
+	Invalidate();
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CimagedesignView::OnExpand()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CimagedesignView::OnRotate()
+{
+	//MessageBox(_T("消息框"), NULL, MB_OK);
+	// TODO: 在此添加命令处理程序代码
+	if (Crotate == NULL) {
+		Crotate = new CRotateDlg;
+		Crotate->Create(IDD_DIALOG2, this);
+
+	}
+	if (is_closed) {
+		pen_view = d_rotate;
+		Crotate->ShowWindow(SW_SHOW);
+	}
+	
+}
+
+
+void CimagedesignView::OnSymmetry()
+{
+	symmetry_count = 0;
+	if (symmetry_pt.GetSize()>0) {
+		symmetry_pt.RemoveAll();
+	}
+	if (is_closed) {
+		pen_view = d_symmetry;
+	}
+	Invalidate();
+	// TODO: 在此添加命令处理程序代码
 }

@@ -184,6 +184,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Cpoint_data.h" />
+    <ClInclude Include="CRotateDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="image_design.h" />
     <ClInclude Include="image_designDoc.h" />
@@ -195,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Cpoint_data.cpp" />
+    <ClCompile Include="CRotateDlg.cpp" />
     <ClCompile Include="image_design.cpp" />
     <ClCompile Include="image_designDoc.cpp" />
     <ClCompile Include="image_designView.cpp" />

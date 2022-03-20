@@ -5,7 +5,8 @@
 #pragma once
 
 class Cpoint_data;
-enum pen_state { d_none = 0,d_point, d_line, d_rect, d_cut };
+class CRotateDlg;
+enum pen_state { d_none = 0,d_point, d_line, d_rect, d_cut ,d_drag,d_symmetry,d_rotate};
 class CimagedesignView : public CView
 {
 protected: // 仅从序列化创建
@@ -21,11 +22,12 @@ public:
 // 操作
 public:
 	Cpoint_data* Cptdata = NULL;
+	CRotateDlg* Crotate = NULL;
 	CPoint last_p;
-	CArray<CPoint> cli_pt,rect_pt,cut_pt;
+	CArray<CPoint> cli_pt,rect_pt,cut_pt,drag_pt, symmetry_pt;
 	bool fillFlag = false;
 	bool is_closed = false;
-	pen_state pen_view = d_point;
+	pen_state pen_view = d_line;
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
@@ -59,6 +61,11 @@ public:
 	afx_msg void OnPolyCut();
 	afx_msg void OnClearImg();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnDrag();
+	afx_msg void OnExpand();
+	afx_msg void OnRotate();
+	afx_msg void OnSymmetry();
 };
 
 #ifndef _DEBUG  // image_designView.cpp 中的调试版本
