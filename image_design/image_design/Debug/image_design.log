@@ -1,7 +1,12 @@
 ﻿  image_designView.cpp
-D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\resource.h(10,1): warning C4005: “IDCANCEL”: 宏重定义
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\resource.h(11,1): warning C4005: “IDCANCEL”: 宏重定义
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winuser.h(11118): message : 参见“IDCANCEL”的前一个定义
-D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(759,12): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(763,71): warning C4244: “=”: 从“float”转换到“LONG”，可能丢失数据
-D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(764,72): warning C4244: “=”: 从“float”转换到“LONG”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(774,12): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(778,71): warning C4244: “=”: 从“float”转换到“LONG”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(779,72): warning C4244: “=”: 从“float”转换到“LONG”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(859,80): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(869,82): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(870,82): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(891,34): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(892,34): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
   image_design.vcxproj -> D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\Debug\image_design.exe

@@ -10,7 +10,8 @@
 #ifndef SHARED_HANDLERS
 #include "Cpoint_data.h"
 #include "image_design.h"
-#include"CRotateDlg.h"
+#include "CRotateDlg.h"
+#include "CExtend.h"
 #endif
 
 #include "image_designDoc.h"
@@ -46,7 +47,8 @@ BEGIN_MESSAGE_MAP(CimagedesignView, CView)
 END_MESSAGE_MAP()
 bool is_fill = false;
 CPoint last_point,er_point;
-int rect_count = 0,xmin=0,xmax=50000,ymin=0,ymax=50000, drag_count = 0, symmetry_count = 0;
+int rect_count = 0,xmin=0,xmax=50000,ymin=0,ymax=50000, drag_count = 0, symmetry_count = 0,rotate_degree = 0,extend_detla = 100;
+CPoint zero_pt(500,500);
 // CimagedesignView 构造/析构
 void InsertPoint_x(CArray<int, int>& m_x_Array, int m_x);
 int GetInterPointX(int yx, int x0, int y0, int x1, int y1);
@@ -80,6 +82,8 @@ BOOL CimagedesignView::PreCreateWindow(CREATESTRUCT& cs)
 
 void CimagedesignView::OnDraw(CDC* pDC)
 {
+	rotate_img();
+	extend_img();
 	CimagedesignDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
@@ -97,7 +101,8 @@ void CimagedesignView::OnDraw(CDC* pDC)
 	h_dc.FillSolidRect(0, 0, wndRect2.Width(), wndRect2.Height(), RGB(255, 255, 255));
 
 	CPoint point;
-	
+	if(pen_view == d_rotate||pen_view == d_extend)
+		cli_pt.Add(zero_pt);
 	for (int i = 0; i < cli_pt.GetSize(); i++) {
 		point = cli_pt.GetAt(i);
 		CString str;
@@ -113,14 +118,18 @@ void CimagedesignView::OnDraw(CDC* pDC)
 		h_dc.Ellipse(rect);
 		h_dc.SelectObject(old);
 		if (i>0&&pen_view != d_point) {
+			if ((pen_view == d_rotate || pen_view == d_extend) && i == cli_pt.GetSize() - 1)
+				continue;
 			last_p = cli_pt.GetAt(i-1);	
 			DDA_Line(n_dc, last_p, point, RGB(0, 0, 0));
 
 		}
 	}
+	if (pen_view == d_rotate || pen_view == d_extend)
+		cli_pt.RemoveAt(cli_pt.GetSize() - 1);
 	if (is_closed && pen_view != d_point) {
 		last_p = cli_pt.GetAt(0);
-		DDA_Line(n_dc, point, last_p, RGB(0, 0, 0));
+		DDA_Line(n_dc, cli_pt.GetAt(cli_pt.GetSize() - 1), last_p, RGB(0, 0, 0));
 
 	}
 	if(fillFlag)
@@ -211,6 +220,12 @@ void CimagedesignView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	if (pen_view == d_rotate) {
 		Crotate->set_edit(point);
+		rotate_pt.Copy(cli_pt);
+
+	}
+	if (pen_view == d_extend) {
+		Cextend_dlg->set_edit(point);
+		extend_pt.Copy(cli_pt);
 	}
 	if (is_closed) {
 		return;
@@ -786,6 +801,18 @@ void CimagedesignView::OnDrag()
 
 void CimagedesignView::OnExpand()
 {
+	if (Cextend_dlg== NULL) {
+		Cextend_dlg = new CExtend;
+		Cextend_dlg->Create(IDD_DIALOG3, this);
+
+	}
+	if (is_closed) {
+		pen_view = d_extend;
+		zero_pt = cli_pt.GetAt(0);
+		extend_pt.Copy(cli_pt);
+		Cextend_dlg->ShowWindow(SW_SHOW);
+		Cextend_dlg->set_edit(zero_pt);
+	}
 	// TODO: 在此添加命令处理程序代码
 }
 
@@ -800,8 +827,11 @@ void CimagedesignView::OnRotate()
 
 	}
 	if (is_closed) {
+		rotate_pt.Copy(cli_pt);
 		pen_view = d_rotate;
+		zero_pt = cli_pt.GetAt(0);
 		Crotate->ShowWindow(SW_SHOW);
+		Crotate->set_edit(zero_pt);
 	}
 	
 }
@@ -818,4 +848,51 @@ void CimagedesignView::OnSymmetry()
 	}
 	Invalidate();
 	// TODO: 在此添加命令处理程序代码
+}
+
+void CimagedesignView::rotate_img()
+{
+	CRect wndRect2;
+	GetClientRect(wndRect2);
+	if (rotate_degree != 0) {
+		CPoint temp;
+		int x, y, x1, y1,x2 = zero_pt.x,y2 = zero_pt.y, row,theta = rotate_degree,pi = 3.14159;
+		row = wndRect2.Height();
+		for (int i = 0; i < rotate_pt.GetSize(); i++) {
+			temp = rotate_pt.GetAt(i);
+			x1 = temp.x;
+			y1 = temp.y;
+			x1 = x1;
+			y1 = y1;
+			x2 = x2;
+			y2 = y2;
+			x = (x1 - x2) * cos(pi / 180.0 * theta) - (y1 - y2) * sin(pi / 180.0 * theta) + x2;
+			y = (x1 - x2) * sin(pi / 180.0 * theta) + (y1 - y2) * cos(pi / 180.0 * theta) + y2;
+			x = x;
+			y = y;
+			temp.x = x;
+			temp.y = y;
+			cli_pt.SetAt(i, temp);
+
+		}
+	
+	}
+}
+
+void CimagedesignView::extend_img()
+{
+	if (extend_detla != 100) {
+		CPoint temp;
+		int x0 = zero_pt.x, y0 = zero_pt.y, x1, y1,x,y;
+		for (int i = 0; i < extend_pt.GetSize(); i++) {
+			temp = extend_pt.GetAt(i);
+			x1 = temp.x;
+			y1 = temp.y;
+			x = extend_detla / 100.0 * x1 + (1.00 - extend_detla / 100.0) * x0;
+			y = extend_detla / 100.0 * y1 + (1.00 - extend_detla / 100.0) * y0;
+			temp.x = x;
+			temp.y = y;
+			cli_pt.SetAt(i, temp);
+		}
+	}
 }

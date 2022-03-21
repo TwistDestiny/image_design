@@ -26,4 +26,5 @@ public:
 	void set_edit(CPoint p);
 	CEdit rotate_data;
 	CEdit rotate_zero;
+	afx_msg void OnClose();
 };

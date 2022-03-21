@@ -6,7 +6,8 @@
 
 class Cpoint_data;
 class CRotateDlg;
-enum pen_state { d_none = 0,d_point, d_line, d_rect, d_cut ,d_drag,d_symmetry,d_rotate};
+class CExtend;
+enum pen_state { d_none = 0,d_point, d_line, d_rect, d_cut ,d_drag,d_symmetry,d_rotate,d_extend};
 class CimagedesignView : public CView
 {
 protected: // 仅从序列化创建
@@ -23,8 +24,9 @@ public:
 public:
 	Cpoint_data* Cptdata = NULL;
 	CRotateDlg* Crotate = NULL;
+	CExtend* Cextend_dlg = NULL;
 	CPoint last_p;
-	CArray<CPoint> cli_pt,rect_pt,cut_pt,drag_pt, symmetry_pt;
+	CArray<CPoint> cli_pt,rect_pt,cut_pt,drag_pt, symmetry_pt,rotate_pt,extend_pt;
 	bool fillFlag = false;
 	bool is_closed = false;
 	pen_state pen_view = d_line;
@@ -66,6 +68,8 @@ public:
 	afx_msg void OnExpand();
 	afx_msg void OnRotate();
 	afx_msg void OnSymmetry();
+	void rotate_img();
+	void extend_img();
 };
 
 #ifndef _DEBUG  // image_designView.cpp 中的调试版本

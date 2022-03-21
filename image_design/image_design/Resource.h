@@ -7,6 +7,7 @@
 #define IDR_imagedesignTYPE             130
 #define IDD_DIALOG1                     312
 #define IDD_DIALOG2                     314
+#define IDD_DIALOG3                     316
 #define IDCANCEL                        1000
 #define IDC_EDIT1                       1001
 #define IDC_EDIT2                       1002
@@ -14,6 +15,8 @@
 #define IDC_SPIN1                       1004
 #define IDC_SPIN2                       1005
 #define IDC_EDIT_EXPAND                 1007
+#define IDC_EDIT3                       1008
+#define IDC_SCROLLBAR1                  1009
 #define ID_SHOW                         32773
 #define ID_                             32774
 #define ID_32775                        32775
@@ -34,9 +37,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        316
+#define _APS_NEXT_RESOURCE_VALUE        318
 #define _APS_NEXT_COMMAND_VALUE         32788
-#define _APS_NEXT_CONTROL_VALUE         1008
+#define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

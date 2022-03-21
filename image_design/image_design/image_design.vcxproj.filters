@@ -45,6 +45,9 @@
     <ClInclude Include="CRotateDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CExtend.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="image_design.cpp">
@@ -66,6 +69,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CRotateDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CExtend.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
