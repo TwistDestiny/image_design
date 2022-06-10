@@ -48,6 +48,21 @@
     <ClInclude Include="CExtend.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SpaceOperate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="C3DPoint.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CImgVisiable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PhongLight.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="image_design.cpp">
@@ -72,6 +87,21 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CExtend.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SpaceOperate.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="C3DPoint.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CMatrix.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CImgVisiable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PhongLight.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

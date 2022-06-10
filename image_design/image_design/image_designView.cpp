@@ -12,6 +12,10 @@
 #include "image_design.h"
 #include "CRotateDlg.h"
 #include "CExtend.h"
+#include "SpaceOperate.h"
+#include "C3DPoint.h"
+#include "CImgVisiable.h"
+#include "PhongLight.h"
 #endif
 
 #include "image_designDoc.h"
@@ -20,6 +24,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#include <iostream>
 
 
 // CimagedesignView
@@ -44,12 +49,24 @@ BEGIN_MESSAGE_MAP(CimagedesignView, CView)
 	ON_COMMAND(ID_32785, &CimagedesignView::OnExpand)
 	ON_COMMAND(ID_32786, &CimagedesignView::OnRotate)
 	ON_COMMAND(ID_32787, &CimagedesignView::OnSymmetry)
+	ON_COMMAND(ID_32812, &CimagedesignView::On3DOperate)
 END_MESSAGE_MAP()
 bool is_fill = false;
+bool is_hide_line = false;
+bool is_3D_fill = false;
 CPoint last_point,er_point;
-int rect_count = 0,xmin=0,xmax=50000,ymin=0,ymax=50000, drag_count = 0, symmetry_count = 0,rotate_degree = 0,extend_detla = 100;
+int rect_count = 0,xmin=0,xmax=50000,ymin=0,ymax=50000, drag_count = 0, symmetry_count = 0,rotate_degree = 0,extend_detla = 100,d3_type = 0;
+int view_hight = 0;
+C3DPoint zero_point_3d;
 CPoint zero_pt(500,500);
+pen_state* mypen;
+CArray<C3DPoint> cli_pt_3d,cli_pt_out;
+int drag_x = 0, drag_y = 0;
+int light_r = 255, light_g = 120, light_b = 110;
+COLORREF light_phong = RGB(light_r, light_g, light_b);
+CArray<CImgVisiable*> flat_collection,flat_show;
 // CimagedesignView 构造/析构
+extern bool Move3d;
 void InsertPoint_x(CArray<int, int>& m_x_Array, int m_x);
 int GetInterPointX(int yx, int x0, int y0, int x1, int y1);
 void DDA_Line(CDC*& pDC, CPoint& startPoint, CPoint& endPoint, COLORREF crColor);
@@ -96,44 +113,124 @@ void CimagedesignView::OnDraw(CDC* pDC)
 	h_dc.CreateCompatibleDC(pDC);
 	CRect wndRect2;
 	GetClientRect(wndRect2);
+	view_hight = wndRect2.Height();
 	m_bitmap.CreateCompatibleBitmap(pDC, wndRect2.Width(), wndRect2.Height());
 	SelectObject(h_dc, m_bitmap);
 	h_dc.FillSolidRect(0, 0, wndRect2.Width(), wndRect2.Height(), RGB(255, 255, 255));
-
 	CPoint point;
-	if(pen_view == d_rotate||pen_view == d_extend)
-		cli_pt.Add(zero_pt);
-	for (int i = 0; i < cli_pt.GetSize(); i++) {
-		point = cli_pt.GetAt(i);
-		CString str;
-		//ZeroMemory(&str, sizeof(CString));
-	/*	str.Format(_T("x=%d,y=%d"), point.x, point.y);
-		h_dc.TextOut(point.x, point.y, str);*/
-		/*h_dc.Ellipse(point.x - 3, point.y - 3, point.x + 3, point.y + 3);*/
-		CBrush brush(RGB(0, 0, 0));
-		CBrush* old = h_dc.SelectObject(&brush);
-		CRect rect;
-		rect.SetRect(point.x - 1, point.y - 1, point.x + 1, point.y + 1);
-		rect.InflateRect(3, 3);
-		h_dc.Ellipse(rect);
-		h_dc.SelectObject(old);
-		if (i>0&&pen_view != d_point) {
-			if ((pen_view == d_rotate || pen_view == d_extend) && i == cli_pt.GetSize() - 1)
-				continue;
-			last_p = cli_pt.GetAt(i-1);	
-			DDA_Line(n_dc, last_p, point, RGB(0, 0, 0));
+	//-----2D--------------//
+	if (pen_view != d_3d&& d3_type ==0) {
+		
+		if (pen_view == d_rotate || pen_view == d_extend)
+			cli_pt.Add(zero_pt);
+		for (int i = 0; i < cli_pt.GetSize(); i++) {
+			point = cli_pt.GetAt(i);
+			CString str;
+			//ZeroMemory(&str, sizeof(CString));
+			str.Format(_T("x=%d,y=%d"), point.x, point.y);
+			h_dc.TextOut(point.x, point.y, str);
+			/*h_dc.Ellipse(point.x - 3, point.y - 3, point.x + 3, point.y + 3);*/
+			CBrush brush(RGB(0, 0, 0));
+			CBrush* old = h_dc.SelectObject(&brush);
+			CRect rect;
+			rect.SetRect(point.x - 1, point.y - 1, point.x + 1, point.y + 1);
+			rect.InflateRect(3, 3);
+			h_dc.Ellipse(rect);
+			h_dc.SelectObject(old);
+			if (i > 0 && pen_view != d_point) {
+				if ((pen_view == d_rotate || pen_view == d_extend) && i == cli_pt.GetSize() - 1)
+					continue;
+				last_p = cli_pt.GetAt(i - 1);
+				DDA_Line(n_dc, last_p, point, RGB(0, 0, 0));
+
+			}
+		}
+		if (pen_view == d_rotate || pen_view == d_extend)
+			cli_pt.RemoveAt(cli_pt.GetSize() - 1);
+		if (is_closed && pen_view != d_point) {
+			last_p = cli_pt.GetAt(0);
+			DDA_Line(n_dc, cli_pt.GetAt(cli_pt.GetSize() - 1), last_p, RGB(0, 0, 0));
+
+		}
+		if (fillFlag) {
+			CArray<C3DPoint> cli_pt_r;
+			for (int i = 0; i < cli_pt.GetSize(); i++) {
+				C3DPoint temp(cli_pt.GetAt(i));
+				cli_pt_r.Add(temp);
+			}
+			fillPolygon(n_dc, cli_pt_r);
+		}
+	}
+	//-----2D--------------//
+	//-----3D--------------//
+	else{
+		for (int s = 0; s < flat_show.GetSize(); s++) {
+			cout << "\n当前面" <<  s <<":";
+			for (int k = 0; k < flat_show.GetAt(s)->img_pt.GetSize(); k++) {
+				cout << "(x:" << flat_show.GetAt(s)->img_pt.GetAt(k)._x<<",y:" << flat_show.GetAt(s)->img_pt.GetAt(k)._y<< ",z:" << flat_show.GetAt(s)->img_pt.GetAt(k)._z << ") ";
+			}
+			cout << endl;
+		}
+		bool flag_noline = false;
+		CArray<C3DPoint> *te_3d,*re_3d;
+		for (int j = 0; j < flat_show.GetSize(); j++) {
+			if (j == 1)
+				flag_noline = true;
+
+			cout << "可见面：" << flat_show.GetAt(j)->is_visiable() << endl;
+			bool t_f = flat_show.GetAt(j)->is_visiable();
+			if (j > 1)
+				t_f = !t_f;
+			if (t_f ||!is_hide_line) {
+				te_3d = &(flat_show.GetAt(j)->img_pt);
+				C3DPoint p1(te_3d->GetAt(0)._x, te_3d->GetAt(0)._y, te_3d->GetAt(0)._z), p3, last_p_3d, last_p_out;
+				te_3d->Add(p1);
+				for (int i = 0; i < te_3d->GetSize(); i++) {
+					if (j > 1 && i == 0 && flag_noline)//不画重复的线
+						continue;
+					if (j > 1 && i == 2 && !flag_noline)
+						continue;
+					p3 = te_3d->GetAt(i);
+					p3.To2dPoint();
+					p3.x = p3.x ;
+					p3.y = p3.y ;
+					CString str2;
+					//str2.Format(_T("x=%d,y=%d"), p3.x , p3.y );
+					//dc.TextOut(p3.x, p3.y, str2);
+					CString str;
+					//ZeroMemory(&str, sizeof(CString));
+
+					/*h_dc.Ellipse(point.x - 3, point.y - 3, point.x + 3, point.y + 3);*/
+					CBrush brush(RGB(0, 0, 0));
+					CBrush* old = h_dc.SelectObject(&brush);
+					CRect rect;
+					rect.SetRect(p3.x - 1, p3.y - 1, p3.x + 1, p3.y + 1);
+					rect.InflateRect(2, 2);
+					h_dc.Ellipse(rect);
+					h_dc.SelectObject(old);
+					if (i > 0 && pen_view != d_point) {
+						last_p_3d = te_3d->GetAt(i - 1);
+						last_p_3d.To2dPoint();
+						last_p_3d.x = last_p_3d.x ;
+						last_p_3d.y = last_p_3d.y ;
+						DDA_Line(n_dc, last_p_3d, p3, RGB(0, 0, 0));
+					}
+				}
+				te_3d->RemoveAt(te_3d->GetSize() - 1);
+				if (is_3D_fill) {
+					COLORREF col = fill_3Dlight(flat_show.GetAt(j)->flat_vector);
+					fillPolygon(n_dc, flat_show.GetAt(j)->img_pt, col);
+				}
+
+				DDA_Line(n_dc, last_p_3d, p3, RGB(0, 0, 0));
+			}
 
 		}
 	}
-	if (pen_view == d_rotate || pen_view == d_extend)
-		cli_pt.RemoveAt(cli_pt.GetSize() - 1);
-	if (is_closed && pen_view != d_point) {
-		last_p = cli_pt.GetAt(0);
-		DDA_Line(n_dc, cli_pt.GetAt(cli_pt.GetSize() - 1), last_p, RGB(0, 0, 0));
+	//-----3D--------------//
 
-	}
-	if(fillFlag)
-		fillPolygon(n_dc);
+	
+		
 	if (rect_count == 2&&pen_view == d_rect) {
 
 		n_dc->SelectObject(GetStockObject(NULL_BRUSH));
@@ -193,22 +290,37 @@ void CimagedesignView::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 		return;
 	}
-	if (pen_view == d_drag) {
+	if (pen_view == d_drag || Move3d) {
 		drag_count++;
 		drag_pt.Add(point);
 		if (drag_count == 2) {
 			int dx = drag_pt.GetAt(1).x - drag_pt.GetAt(0).x, dy = drag_pt.GetAt(1).y - drag_pt.GetAt(0).y;
 			CPoint temp;
+			C3DPoint te2,te3;
 			for (int t = 0; t < cli_pt.GetSize(); t++) {
 				temp = cli_pt.GetAt(t);
+
 				temp.x += dx;
 				temp.y += dy;
 				cli_pt.SetAt(t, temp);
+				/*te2 = cli_pt_3d.GetAt(t);
+				te3 = cli_pt_out.GetAt(t);*/
+				te2.x += dx;
+				te2.y += dy;
+				te3.x += dx;
+				te3.y += dy;
+				/*cli_pt_3d.SetAt(t, te2);
+				cli_pt_out.SetAt(t, te3);*/
 				
+			}
+			if (d3_type) {
+				drag_x += dx;
+				drag_y += dy;
 			}
 			drag_count = 0;
 			drag_pt.RemoveAll();
 			Invalidate();
+			Move3d = false;
 		}
 	}
 	if (pen_view == d_symmetry) {
@@ -556,57 +668,65 @@ void CimagedesignView::OnPolyCut()
 
 }
 
-void CimagedesignView::fillPolygon(CDC* pDC) {
+void CimagedesignView::fillPolygon(CDC* pDC,CArray<C3DPoint>& draw_pt,COLORREF col) {
 	int ymin, ymax;
-	if (this->cli_pt.GetAt(0).y <= this->cli_pt.GetAt(1).y) {
-		ymin = this->cli_pt.GetAt(0).y;
-		ymax = this->cli_pt.GetAt(1).y;
+	cout << "\n当前面" << ":";
+	for (int j = 0; j < draw_pt.GetSize(); j++) {
+		draw_pt.GetAt(j).To2dPoint(d3_type);
+		cout << "(x:" << draw_pt.GetAt(j).x << ",y:" << draw_pt.GetAt(j).y  <<",color:"<< col << ") ";
+	}
+	//cout << endl;
+		
+	if (draw_pt.GetAt(0).y <= draw_pt.GetAt(1).y) {
+		ymin = draw_pt.GetAt(0).y;
+		ymax = draw_pt.GetAt(1).y;
 	}
 	else {
-		ymin = this->cli_pt.GetAt(1).y;
-		ymax = this->cli_pt.GetAt(2).y;
+		ymin = draw_pt.GetAt(1).y;
+		ymax = draw_pt.GetAt(0).y;
 	}
-	for (int i = 2; i <= this->cli_pt.GetSize() - 1; i++) {
-		if (this->cli_pt.GetAt(i).y < ymin)
-			ymin = this->cli_pt.GetAt(i).y;
-		else  if (this->cli_pt.GetAt(i).y > ymax)
-			ymax = this->cli_pt.GetAt(i).y;
+	for (int i = 2; i <= draw_pt.GetSize() - 1; i++) {
+		if (draw_pt.GetAt(i).y < ymin)
+			ymin = draw_pt.GetAt(i).y;
+		else  if (draw_pt.GetAt(i).y > ymax)
+			ymax = draw_pt.GetAt(i).y;
 	}
 	//从ymin扫描到 ymax
-	CPoint tmp = cli_pt.GetAt(0);
-	this->cli_pt.Add(tmp);//首先把首点加到最后一点，使首尾相接，最后删除
-	//this->cli_pt.Add(cli_pt.GetAt(0));//首先把首点加到最后一点，使首尾相接，最后删除
+	C3DPoint tmp = draw_pt.GetAt(0);
+	draw_pt.Add(tmp);//首先把首点加到最后一点，使首尾相接，最后删除
+	//draw_pt.Add(draw_pt.GetAt(0));//首先把首点加到最后一点，使首尾相接，最后删除
 	CArray<int, int> m_x_Array;//排序后的交点集合
 	int m_x;//交点
 	int j, k;
 	for (int yi = ymin; yi <= ymax; yi++) {
 		m_x_Array.RemoveAll();
 		//判断扫描线和那些边相交，如相交，求交点,并排序
-		for (int i = 0; i < cli_pt.GetSize() - 1; i++) {
-			if (yi >= cli_pt.GetAt(i).y && yi < cli_pt.GetAt(i + 1).y) {
+
+		for (int i = 0; i < draw_pt.GetSize() - 1; i++) {
+			if (yi >= draw_pt.GetAt(i).y && yi < draw_pt.GetAt(i + 1).y) {
 				//求交点				
-				m_x = GetInterPointX(yi, cli_pt.GetAt(i).x, cli_pt.GetAt(i).y, cli_pt.GetAt(i + 1).x, cli_pt.GetAt(i + 1).y);
+				m_x = GetInterPointX(yi, draw_pt.GetAt(i).x, draw_pt.GetAt(i).y, draw_pt.GetAt(i + 1).x, draw_pt.GetAt(i + 1).y);
 				InsertPoint_x(m_x_Array, m_x);
 			}
-			else if (yi >= cli_pt.GetAt(i + 1).y && yi < cli_pt.GetAt(i).y) {
+			else if (yi >= draw_pt.GetAt(i + 1).y && yi < draw_pt.GetAt(i).y) {
 				//求交点				
-				m_x = GetInterPointX(yi, cli_pt.GetAt(i).x, cli_pt.GetAt(i).y, cli_pt.GetAt(i + 1).x, cli_pt.GetAt(i + 1).y);
+				m_x = GetInterPointX(yi, draw_pt.GetAt(i).x, draw_pt.GetAt(i).y, draw_pt.GetAt(i + 1).x, draw_pt.GetAt(i + 1).y);
 				InsertPoint_x(m_x_Array, m_x);
 			}
-			else if (yi == cli_pt.GetAt(i + 1).y && yi == cli_pt.GetAt(i).y) {
+			else if (yi == draw_pt.GetAt(i + 1).y && yi == draw_pt.GetAt(i).y) {
 				//是水平线,则将两个端点加入点集
-				InsertPoint_x(m_x_Array, cli_pt.GetAt(i).x);
-				InsertPoint_x(m_x_Array, cli_pt.GetAt(i + 1).x);
+				InsertPoint_x(m_x_Array, draw_pt.GetAt(i).x);
+				InsertPoint_x(m_x_Array, draw_pt.GetAt(i + 1).x);
 			}
 		}
 		//填充色
 		for (j = 0; j <= m_x_Array.GetSize() - 2; j++, j++) {
 			for (k = m_x_Array.GetAt(j); k <= m_x_Array.GetAt(j + 1); k++)
-				pDC->SetPixel(k, yi, RGB(0, 255, 0));
+				pDC->SetPixel(k, yi, col);
 
 		}
 	}
-	this->cli_pt.RemoveAt(cli_pt.GetSize() - 1);
+	draw_pt.RemoveAt(draw_pt.GetSize() - 1);
 }
 
 //void CetRectLineX(CPoint p1, CPoint p2, CPoint t1, CPoint t2,int flag) {
@@ -761,6 +881,15 @@ void CimagedesignView::OnRButtonDown(UINT nFlags, CPoint point)
 		OnPolyCut();
 	else if (is_closed && symmetry_count == 2) {
 		int x1 = symmetry_pt.GetAt(0).x, y1 = symmetry_pt.GetAt(0).y, x2 = symmetry_pt.GetAt(1).x, y2 = symmetry_pt.GetAt(1).y;
+		if (d3_type) {
+
+			y1 = view_hight - y1;
+			x1 = x1 - zero_point_3d._x;
+			y1 = y1 - zero_point_3d._y;
+			y2 = view_hight - y2;
+			x2 = x2 - zero_point_3d._x;
+			y2 = y2 - zero_point_3d._y;
+		}
 		CPoint temp;
 		if (x1 == x2) {
 			for (int z = 0; z < cli_pt.GetSize(); z++) {
@@ -768,6 +897,21 @@ void CimagedesignView::OnRButtonDown(UINT nFlags, CPoint point)
 				temp.x = 2 * x1 - temp.x;
 				cli_pt.SetAt(z, temp);
 			}
+			if (d3_type) {   //3D模型镜像变换
+				for (int zr = 0; zr < flat_show.GetSize(); zr++) {
+					for (int zj = 0; zj < flat_show.GetAt(zr)->img_pt.GetSize(); zj++) {
+						flat_show.GetAt(zr)->img_pt.GetAt(zj)._x = 2 * x1 - flat_show.GetAt(zr)->img_pt.GetAt(zj)._x;
+						flat_show.GetAt(zr)->img_pt.GetAt(zj)._y = 2 * x1 - flat_show.GetAt(zr)->img_pt.GetAt(zj)._y;
+						flat_collection.GetAt(zr)->img_pt.GetAt(zj)._x = 2 * x1 - flat_collection.GetAt(zr)->img_pt.GetAt(zj)._x;
+						flat_collection.GetAt(zr)->img_pt.GetAt(zj)._y = 2 * x1 - flat_collection.GetAt(zr)->img_pt.GetAt(zj)._y;
+					}
+				}
+				symmetry_count = 0;
+				if (symmetry_pt.GetSize() > 0) {
+					symmetry_pt.RemoveAll();
+				}
+				pen_view = d_3d;
+			}	
 		}
 		else {
 			int A = y1 - y2, B = x2 - x1, C = (x1 - x2) * y1 - (y1 - y2) * x1;
@@ -778,6 +922,24 @@ void CimagedesignView::OnRButtonDown(UINT nFlags, CPoint point)
 				temp.x = -1 * (2 * A * B * jb + (A * A - B * B) * ja + 2 * A * C) / M;
 				temp.y = -1 * (2 * A * B * ja + (-A * A + B * B) * jb + 2 * B * C) / M;
 				cli_pt.SetAt(z, temp);
+			}
+			if (d3_type) {  //3D模型镜像变换
+				for (int zr = 0; zr < flat_show.GetSize(); zr++) {
+					for (int zj = 0; zj < flat_show.GetAt(zr)->img_pt.GetSize(); zj++) {
+						int ja = flat_show.GetAt(zr)->img_pt.GetAt(zj)._x, jb = flat_show.GetAt(zr)->img_pt.GetAt(zj)._y;
+						flat_show.GetAt(zr)->img_pt.GetAt(zj)._x = -1 * (2 * A * B * jb + (A * A - B * B) * ja + 2 * A * C) / M;
+						flat_show.GetAt(zr)->img_pt.GetAt(zj)._y = -1 * (2 * A * B * ja + (-A * A + B * B) * jb + 2 * B * C) / M;
+						ja = flat_collection.GetAt(zr)->img_pt.GetAt(zj)._x;
+						jb = flat_collection.GetAt(zr)->img_pt.GetAt(zj)._y;
+						flat_collection.GetAt(zr)->img_pt.GetAt(zj)._x = -1 * (2 * A * B * jb + (A * A - B * B) * ja + 2 * A * C) / M;
+						flat_collection.GetAt(zr)->img_pt.GetAt(zj)._y = -1 * (2 * A * B * ja + (-A * A + B * B) * jb + 2 * B * C) / M;
+					}
+				}
+				symmetry_count = 0;
+				if (symmetry_pt.GetSize() > 0) {
+					symmetry_pt.RemoveAll();
+				}
+				pen_view = d_3d; 
 			}
 		}
 		Invalidate();
@@ -895,4 +1057,104 @@ void CimagedesignView::extend_img()
 			cli_pt.SetAt(i, temp);
 		}
 	}
+}
+COLORREF CimagedesignView::fill_3Dlight(C3DPoint vector_line)
+{
+	PhongLight this_light;
+	int p_z_1 = abs(vector_line._z);
+	int p_x_1 = vector_line._x;
+	int p_y_1 = vector_line._y;
+	double p_x = (p_x_1 * 3) / (abs(p_z_1) + abs(p_x_1) + abs(p_y_1));
+	double p_y = (p_y_1 * 3) / (abs(p_z_1) + abs(p_x_1) + abs(p_y_1));
+	double p_z = (p_z_1 * 3) / (abs(p_z_1) + abs(p_x_1) + abs(p_y_1));
+	float mdblE = this_light.Envirment_li / 100.0;
+	float mdblD = this_light.m_reflect_li / 100.0;
+	float mdblM = this_light.v_reflect_li / 100.0;
+	float mtotal;
+	cout << "sqrt = " << (p_x * p_x + p_y * p_y + p_z * p_z) << endl;
+	float _zldotn = p_z <= 0 ? 0 : p_z /sqrt(p_x * p_x + p_y * p_y + p_z * p_z);
+	float mdblFatt = this_light.de_li / 100.0, mdblDefuse = 0.5;
+	mdblD = mdblFatt * mdblDefuse * _zldotn;
+	float  m_hdot = _zldotn;
+	mdblM = this_light.v_highlight_parm* pow(_zldotn,this_light.v_hightlight_exp);
+	mtotal = mdblE * 0.1 + mdblD * 0.3 + mdblM * 0.6;
+	cout << "(x:" << p_x << ",y:" << p_y << ",z:" << p_z << ",_zldotn:"<< _zldotn << ") ";
+	cout << "color = " << mtotal << endl;
+	return RGB(this_light.light_r * mtotal, this_light.light_g * mtotal, this_light.light_b * mtotal);
+
+}
+//拉伸 旋转 平移 镜像
+
+void CimagedesignView::On3DOperate()
+{
+	if (C3DOperate == NULL) {
+		C3DOperate = new SpaceOperate;
+		C3DOperate->Create(IDD_DIALOG4, this);
+
+	}
+	if (is_closed) {
+		zero_point_3d._x = cli_pt.GetAt(0).x;
+		zero_point_3d._y = view_hight - cli_pt.GetAt(0).y;
+		zero_point_3d._z = 0;
+		for (int i = 0; i < cli_pt.GetSize(); i++) {
+			C3DPoint temp(cli_pt.GetAt(i));
+			cli_pt_3d.Add(temp);
+			C3DPoint temp2(cli_pt.GetAt(i),10);
+			cli_pt_out.Add(temp2);
+		}
+
+		CImgVisiable* p1 = new CImgVisiable();
+		CImgVisiable* p2 = new CImgVisiable();
+		p1->img_pt.Copy(cli_pt_3d);
+		p2->img_pt.Copy(cli_pt_out);
+		p1->setdir(true);
+		p2->setdir(true);
+		flat_collection.Add(p1);
+		flat_collection.Add(p2);
+		//保存两份防止多次运算累计误差
+
+		CImgVisiable* p3 = new CImgVisiable();
+		CImgVisiable* p4 = new CImgVisiable();
+		p3->img_pt.Copy(p1->img_pt);
+		p4->img_pt.Copy(p2->img_pt);
+		flat_show.Add(p3);
+		flat_show.Add(p4);
+
+		C3DPoint temp3dpoint1 = p1->img_pt.GetAt(0);
+		p1->img_pt.Add(temp3dpoint1);
+		C3DPoint temp3dpoint2 = p2->img_pt.GetAt(0);
+		p2->img_pt.Add(temp3dpoint2);
+
+		for (int i = 0; i < p1->img_pt.GetSize() - 1; i++) {
+			CImgVisiable* ptemp =  new CImgVisiable();
+			CArray<C3DPoint> temp;
+			temp.Add(p2->img_pt.GetAt(i));
+			temp.Add(p2->img_pt.GetAt(i + 1));
+			temp.Add(p1->img_pt.GetAt(i + 1));
+			temp.Add(p1->img_pt.GetAt(i));
+			ptemp->img_pt.Copy(temp);
+			flat_collection.Add(ptemp);
+
+			CImgVisiable* ptemp2 = new CImgVisiable();
+			ptemp2->img_pt.Copy(ptemp->img_pt);
+			flat_show.Add(ptemp2);
+		}
+		
+		p1->img_pt.RemoveAt(p1->img_pt.GetSize() - 1);
+		p2->img_pt.RemoveAt(p2->img_pt.GetSize() - 1);
+		p1->setdir(false);
+		flat_show.GetAt(0)->setdir(false);
+		for (int j = 0; j < flat_collection.GetSize(); j++) {
+			flat_show.GetAt(j)->getline();
+		}
+
+		mypen = &pen_view;
+		pen_view = d_3d;
+		C3DOperate->ShowWindow(SW_SHOW);
+		C3DOperate->set_edit();
+		d3_type = 1;
+
+	}
+
+	// TODO: 在此添加命令处理程序代码
 }

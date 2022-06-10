@@ -5,9 +5,12 @@
 #pragma once
 
 class Cpoint_data;
+class C3DPoint;
 class CRotateDlg;
 class CExtend;
-enum pen_state { d_none = 0,d_point, d_line, d_rect, d_cut ,d_drag,d_symmetry,d_rotate,d_extend};
+class SpaceOperate;
+class PhongLight;
+
 class CimagedesignView : public CView
 {
 protected: // 仅从序列化创建
@@ -25,6 +28,7 @@ public:
 	Cpoint_data* Cptdata = NULL;
 	CRotateDlg* Crotate = NULL;
 	CExtend* Cextend_dlg = NULL;
+	SpaceOperate* C3DOperate = NULL;
 	CPoint last_p;
 	CArray<CPoint> cli_pt,rect_pt,cut_pt,drag_pt, symmetry_pt,rotate_pt,extend_pt;
 	bool fillFlag = false;
@@ -54,7 +58,7 @@ public:
 	afx_msg void OnShow();
 	afx_msg void OnClick();
 	afx_msg void OnFill();
-	void fillPolygon(CDC* pDC);
+	void fillPolygon(CDC* pDC, CArray<C3DPoint>& draw_pt, COLORREF col = RGB(0, 255, 0));
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnDrawPoint();
 	afx_msg void OnDrawLine();
@@ -70,6 +74,8 @@ public:
 	afx_msg void OnSymmetry();
 	void rotate_img();
 	void extend_img();
+	COLORREF fill_3Dlight(C3DPoint vector_line);
+	afx_msg void On3DOperate();
 };
 
 #ifndef _DEBUG  // image_designView.cpp 中的调试版本

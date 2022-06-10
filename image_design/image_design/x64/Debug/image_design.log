@@ -1,0 +1,21 @@
+﻿  image_designView.cpp
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\resource.h(12,1): warning C4005: “IDCANCEL”: 宏重定义
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winuser.h(11118): message : 参见“IDCANCEL”的前一个定义
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\PhongLight.h(13,25): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(165,28): warning C4101: “re_3d”: 未引用的局部变量
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(886,12): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(890,71): warning C4244: “=”: 从“float”转换到“LONG”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(891,72): warning C4244: “=”: 从“float”转换到“LONG”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(971,80): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(981,82): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(982,82): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1003,34): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1004,34): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1015,14): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1016,14): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1017,14): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1019,16): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1020,17): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1023,37): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\image_design\image_designView.cpp(1024,37): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+  image_design.vcxproj -> D:\BaiduNetdiskDownload\vs\MFCLibrary1\image_design\image_design\x64\Debug\image_design.exe

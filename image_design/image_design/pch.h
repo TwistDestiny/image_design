@@ -12,3 +12,4 @@
 #include "vector"
 #endif //PCH_H
 using namespace std;
+enum pen_state { d_none = 0, d_point, d_line, d_rect, d_cut, d_drag, d_symmetry, d_rotate, d_extend, d_3d };
